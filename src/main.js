@@ -195,7 +195,7 @@ const renderTaskCard = () => `<article class="card card--black">
 </article>`;
 
 /**
- * Рендерит компонент формы
+ * Рендерит компонент формы (вообще не понял, о какой форме речь)
  */
 const renderForm = () => {};
 
