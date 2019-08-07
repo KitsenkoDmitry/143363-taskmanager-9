@@ -1,7 +1,7 @@
 # Личный проект «Менеджер задач» [![Build status][travis-image]][travis-url]
 
 - Студент: [Дмитрий Киценко](https://up.htmlacademy.ru/ecmascript/9/user/143363).
-- Наставник: [Дмитрий Рябинин](https://htmlacademy.ru/profile/haschish).
+- Наставник: [Дмитрий Рябинин](https://up.htmlacademy.ru/ecmascript/9/user/63289).
 
 ---
 
