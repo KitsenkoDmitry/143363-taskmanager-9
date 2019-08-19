@@ -7,24 +7,21 @@ export const renderEditTaskCard = ({
   isFavourite,
   isArchive
 }) =>
-  `<article class="card card--edit card--${color} ${
-    Object.keys(repeatingDays).some(day => repeatingDays[day])
-      ? `card--repeat`
-      : ``
-  }">
+  `<article class="card card--edit card--${color}
+  ${Object.keys(repeatingDays).some((day) => repeatingDays[day]) ? `card--repeat` : ``}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__control">
-          <button type="button" class="card__btn card__btn--archive ${
-            isArchive ? `` : `card__btn--disabled`
-          }">
+          <button
+            type="button"
+            class="card__btn card__btn--archive
+            ${isArchive ? `` : `card__btn--disabled`}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites ${
-              isFavourite ? `` : `card__btn--disabled`
-            }"
+            class="card__btn card__btn--favorites
+            ${isFavourite ? `` : `card__btn--disabled`}"
           >
             favorites
           </button>
@@ -51,14 +48,13 @@ export const renderEditTaskCard = ({
           <div class="card__details">
             <div class="card__dates">
               <button class="card__date-deadline-toggle" type="button">
-                date: <span class="card__date-status">  ${
-                  dueDate ? new Date(dueDate).toDateString() : `no`
-                }</span>
+                date: <span class="card__date-status">
+                  ${dueDate ? new Date(dueDate).toDateString() : `no`}
+                </span>
               </button>
 
-              <fieldset class="card__date-deadline" ${
-                dueDate ? `` : `disabled`
-              }>
+              <fieldset class="card__date-deadline"
+                ${dueDate ? `` : `disabled`}>
                 <label class="card__input-deadline-wrap">
                   <input
                     class="card__date"
@@ -72,19 +68,12 @@ export const renderEditTaskCard = ({
 
               <button class="card__repeat-toggle" type="button">
                 repeat:<span class="card__repeat-status">
-                ${
-                  Object.keys(repeatingDays).some(day => repeatingDays[day])
-                    ? `yes`
-                    : `no`
-                }
+                ${Object.keys(repeatingDays).some((day) => repeatingDays[day]) ? `yes` : `no`}
                 </span>
               </button>
 
-              <fieldset class="card__repeat-days" ${
-                Object.keys(repeatingDays).some(day => repeatingDays[day])
-                  ? ``
-                  : `disabled`
-              }>
+              <fieldset class="card__repeat-days"
+                ${Object.keys(repeatingDays).some((day) => repeatingDays[day]) ? `` : `disabled`}>
                 <div class="card__repeat-days-inner">
                   <input
                     class="visually-hidden card__repeat-day-input"
@@ -169,15 +158,11 @@ export const renderEditTaskCard = ({
 
             <div class="card__hashtag">
               <div class="card__hashtag-list">
-                ${Array.from(tags)
-                  .map(
-                    tag => `<span class="card__hashtag-inner">
+                ${Array.from(tags).map((tag) => `<span class="card__hashtag-inner">
                       <span class="card__hashtag-name">
                         #${tag}
                       </span>
-                    </span>`
-                  )
-                  .join(``)}
+                    </span>`).join(``)}
               </div>
 
               <label>
@@ -200,7 +185,7 @@ export const renderEditTaskCard = ({
                 class="card__color-input card__color-input--black visually-hidden"
                 name="color"
                 value="black"
-                ${color === "black" ? `checked` : ``}
+                ${color === `black` ? `checked` : ``}
               />
               <label
                 for="color-black-1"
@@ -213,7 +198,7 @@ export const renderEditTaskCard = ({
                 class="card__color-input card__color-input--yellow visually-hidden"
                 name="color"
                 value="yellow"
-                ${color === "yellow" ? `checked` : ``}
+                ${color === `yellow` ? `checked` : ``}
               />
               <label
                 for="color-yellow-1"
@@ -226,7 +211,7 @@ export const renderEditTaskCard = ({
                 class="card__color-input card__color-input--blue visually-hidden"
                 name="color"
                 value="blue"
-                ${color === "blue" ? `checked` : ``}
+                ${color === `blue` ? `checked` : ``}
               />
               <label
                 for="color-blue-1"
@@ -239,7 +224,7 @@ export const renderEditTaskCard = ({
                 class="card__color-input card__color-input--green visually-hidden"
                 name="color"
                 value="green"
-                ${color === "green" ? `checked` : ``}
+                ${color === `green` ? `checked` : ``}
               />
               <label
                 for="color-green-1"
@@ -252,7 +237,7 @@ export const renderEditTaskCard = ({
                 class="card__color-input card__color-input--pink visually-hidden"
                 name="color"
                 value="pink"
-                ${color === "pink" ? `checked` : ``}
+                ${color === `pink` ? `checked` : ``}
               />
               <label
                 for="color-pink-1"
