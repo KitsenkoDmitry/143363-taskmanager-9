@@ -1,59 +1,96 @@
-import { renderAdditionalFilters } from "./components/additionalFilters";
-import { renderBoardContainer } from "./components/boardContainer";
-import { renderBoardTasksWrapper } from "./components/boardTaskWrapper";
-import { renderEditTaskCard } from "./components/editTaskCard";
-import { renderFilters } from "./components/filters";
-import { renderLoadMoreBtn } from "./components/loadMoreBtn";
-import { renderMenu } from "./components/menu";
-import { renderSearch } from "./components/search";
-import { makeTask } from "./components/taskCard";
-import { taskArray, filtersArray, TASK_COUNT } from "./data";
-import { renderComponent } from "./helpers";
+import {taskArray, filtersArray, TASK_COUNT} from "./data";
+import Menu from "./components/menu";
+import Search from "./components/search";
+import Filters from "./components/filters";
+import AdditionalFilters from "./components/additionalFilters";
+import EditTask from "./components/editTask";
+import LoadMoreBtn from "./components/loadMoreBtn";
+
+import Task from "./components/task";
+import {render} from "./utils";
 
 const controlElem = document.querySelector(`.control`);
-renderComponent(controlElem, renderMenu());
+const menu = new Menu();
+render(controlElem, menu.getElement());
 
 const mainElem = document.querySelector(`.main`);
-renderComponent(mainElem, renderSearch());
-renderComponent(mainElem, renderFilters(filtersArray));
-renderComponent(mainElem, renderBoardContainer());
+const search = new Search();
+render(mainElem, search.getElement());
 
+const filters = new Filters(filtersArray);
+render(mainElem, filters.getElement());
+
+mainElem.insertAdjacentHTML(`beforeend`, `<section class="board container"></section>`)
 const boardElem = document.querySelector(`.board`);
-renderComponent(boardElem, renderAdditionalFilters());
-renderComponent(boardElem, renderBoardTasksWrapper());
+const additionalFilters = new AdditionalFilters();
+render(boardElem, additionalFilters.getElement());
 
+boardElem.insertAdjacentHTML(`beforeend`, `<div class="board__tasks"></div>`)
 const tasksContainer = document.querySelector(`.board__tasks`);
-renderComponent(tasksContainer, renderEditTaskCard(taskArray[0]));
-renderComponent(boardElem, renderLoadMoreBtn());
-const loadMoreBtn = document.querySelector(`.load-more`);
+
 
 // количество подгружаемых блоков
 const LOAD_BLOCS_QT = 8;
-let startTaskIndex = 1;
-let finishTaskIndex = 8;
+let startTaskIndex = 0;
+let finishTaskIndex = 7;
 
-renderTasks(startTaskIndex, finishTaskIndex);
+const renderTask = (taskMock, index) => {
+  if (index < startTaskIndex || index > finishTaskIndex) return;
+  const task = new Task(taskMock);
+  const editTask = new EditTask(taskMock);
 
-loadMoreBtn.addEventListener(`click`, onLoadMoreBtnClick);
+  const taskElement = task.getElement();
+  const editTaskElement = editTask.getElement();
 
-/**
- * Рендер карточек
- *
- * @param {Number} startIndex Начальный индекс в массиве для рендера
- * @param {Number} finishIndex Конечный индекс в массиве для рендера
- */
-function renderTasks(startIndex, finishIndex) {
-  renderComponent(
-    tasksContainer,
-    taskArray
-      .map((item, index) => {
-        if (index >= startIndex && index < finishIndex) {
-          return makeTask(item);
-        }
-      })
-      .join(``)
-  );
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      tasksContainer.replaceChild(taskElement, editTaskElement);
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  taskElement
+    .querySelector(`.card__btn--edit`)
+    .addEventListener(`click`, () => {
+      tasksContainer.replaceChild(editTaskElement, taskElement);
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+
+  editTaskElement.querySelector(`textarea`)
+    .addEventListener(`focus`, () => {
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
+
+  editTaskElement.querySelector(`textarea`)
+    .addEventListener(`blur`, () => {
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+
+  editTaskElement
+    .querySelector(`.card__save`)
+    .addEventListener(`click`, () => {
+      tasksContainer.replaceChild(taskElement, editTaskElement);
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
+
+  render(tasksContainer, taskElement);
 }
+
+const getTasks = () => {
+  taskArray.forEach((taskMock, index) => renderTask(taskMock, index));
+}
+
+getTasks();
+
+// renderComponent(boardElem, renderLoadMoreBtn());
+// const loadMoreBtn = document.querySelector(`.load-more`);
+
+
+const loadMoreBtn = new LoadMoreBtn();
+const loadMoreBtnElem = loadMoreBtn.getElement();
+render(boardElem, loadMoreBtnElem);
+loadMoreBtnElem.addEventListener(`click`, onLoadMoreBtnClick);
+
 
 /**
  * Колбэк обработчика на клик по кнопке Load more
@@ -64,7 +101,7 @@ function onLoadMoreBtnClick({ currentTarget }) {
   startTaskIndex = finishTaskIndex;
   finishTaskIndex += LOAD_BLOCS_QT;
 
-  renderTasks(startTaskIndex, finishTaskIndex);
+  getTasks();
 
   if (finishTaskIndex >= TASK_COUNT) {
     currentTarget.style.display = `none`;
