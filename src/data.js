@@ -39,7 +39,7 @@ const getTask = () => ({
   isArchive: Boolean(Math.round(Math.random()))
 });
 
-export const TASK_COUNT = 20;
+export const TASK_COUNT = 3;
 export const taskArray = new Array(TASK_COUNT).fill(``).map(getTask);
 
 export const filtersArray = [
