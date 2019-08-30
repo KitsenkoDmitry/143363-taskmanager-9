@@ -1,6 +1,6 @@
 import AbstractComponent from "./abstractComponent";
 
-class EditTask extends AbstractComponent{
+class EditTask extends AbstractComponent {
   constructor(data) {
     super();
     this._description = data.description;

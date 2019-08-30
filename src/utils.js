@@ -3,7 +3,7 @@ const Position = {
   BEFOREEND: `beforeend`
 }
 
-export const render = (container, element, position = `beforeend`) => {
+export const render = (container, element, position = Position.BEFOREEND) => {
   switch (position) {
     case Position.AFTERBEGIN: {
       container.prepend(element);

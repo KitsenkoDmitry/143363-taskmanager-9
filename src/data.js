@@ -1,3 +1,5 @@
+const TASK_COUNT = 10;
+
 const getTask = () => ({
   description: [
     `Изучить теорию`,
@@ -39,31 +41,30 @@ const getTask = () => ({
   isArchive: Boolean(Math.round(Math.random()))
 });
 
-export const TASK_COUNT = 10;
-export const taskArray = new Array(TASK_COUNT).fill(``).map(getTask);
+export const tasksMock = new Array(TASK_COUNT).fill(``).map(getTask);
 
 export const filtersArray = [
   {
     title: `All`,
-    count: taskArray.length
+    count: tasksMock.length
   },
   {
     title: `Overdue`,
-    count: taskArray.filter(task => task.dueDate < Date.now()).length
+    count: tasksMock.filter(task => task.dueDate < Date.now()).length
   },
   {
     title: `Today`,
-    count: taskArray.filter(
+    count: tasksMock.filter(
       task => new Date(task.dueDate).getDay() === new Date().getDay()
     ).length
   },
   {
     title: `Favorites`,
-    count: taskArray.filter(task => task.isFavorite).length
+    count: tasksMock.filter(task => task.isFavorite).length
   },
   {
     title: `Repeating`,
-    count: taskArray.filter(task => {
+    count: tasksMock.filter(task => {
       for (const day in task.repeatingDays) {
         if (task.repeatingDays[day]) return true;
       }
@@ -71,10 +72,10 @@ export const filtersArray = [
   },
   {
     title: `Tags`,
-    count: taskArray.filter(task => task[`tags`].size > 0).length
+    count: tasksMock.filter(task => task[`tags`].size > 0).length
   },
   {
     title: `Archive`,
-    count: taskArray.filter(task => task.isArchive).length
+    count: tasksMock.filter(task => task.isArchive).length
   }
 ];

@@ -1,9 +1,9 @@
-
 import AbstractComponent from './abstractComponent';
 
 class Message extends AbstractComponent {
   constructor(text) {
-    this._element = null;
+    super();
+    this._text = text;
   }
 
   getTemplate() {

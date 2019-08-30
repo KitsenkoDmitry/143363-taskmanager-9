@@ -1,5 +1,5 @@
 import AbstractComponent from './abstractComponent';
-class Task extends AbstractComponent{
+class Task extends AbstractComponent {
   constructor(data) {
     super();
     this._description = data.description;

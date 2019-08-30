@@ -1,6 +1,6 @@
 import AbstractComponent from "./abstractComponent";
 
-class AdditionalFilters extends AbstractComponent{
+class AdditionalFilters extends AbstractComponent {
   constructor() {
     super();
   }

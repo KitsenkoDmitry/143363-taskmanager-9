@@ -1,6 +1,6 @@
 
 import AbstractComponent from './abstractComponent';
-class Menu extends AbstractComponent{
+class Menu extends AbstractComponent {
   constructor() {
     super();
   }
