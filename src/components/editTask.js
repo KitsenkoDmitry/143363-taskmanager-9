@@ -1,36 +1,15 @@
-import {createElement} from '../utils';
+import AbstractComponent from "./abstractComponent";
 
-class EditTask {
-  constructor({
-    description,
-    dueDate,
-    repeatingDays,
-    tags,
-    color,
-    isFavourite,
-    isArchive}) {
-    this._description = description;
-    this._dueDate = new Date(dueDate);
-    this._repeatingDays = repeatingDays;
-    this._tags = tags;
-    this._color = color;
-    this._isFavourite = isFavourite;
-    this._isArchive = isArchive;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    if (this._element) {
-      this._element = null;
-    }
+class EditTask extends AbstractComponent{
+  constructor(data) {
+    super();
+    this._description = data.description;
+    this._dueDate = new Date(data.dueDate);
+    this._repeatingDays = data.repeatingDays;
+    this._tags = data.tags;
+    this._color = data.color;
+    this._isFavourite = data.isFavourite;
+    this._isArchive = data.isArchive;
   }
 
   getTemplate() {

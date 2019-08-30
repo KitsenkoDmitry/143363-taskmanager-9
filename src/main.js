@@ -5,10 +5,11 @@ import Filters from "./components/filters";
 import AdditionalFilters from "./components/additionalFilters";
 import EditTask from "./components/editTask";
 import LoadMoreBtn from "./components/loadMoreBtn";
-
 import Task from "./components/task";
 import {render} from "./utils";
 import Message from "./components/message";
+import BoardContainer from "./components/boardContainer";
+import BoardTasks from "./components/boardTasks";
 
 const controlElem = document.querySelector(`.control`);
 const menu = new Menu();
@@ -21,19 +22,26 @@ render(mainElem, search.getElement());
 const filters = new Filters(filtersArray);
 render(mainElem, filters.getElement());
 
-mainElem.insertAdjacentHTML(`beforeend`, `<section class="board container"></section>`)
+const boardContainer = new BoardContainer;
+render(mainElem, boardContainer.getElement());
+
 const boardElem = document.querySelector(`.board`);
+
+const renderMessage = () => {
+  const messageText = `Congratulations, all tasks were completed!
+    To create a new click on «add new task» button.`;
+  const messageElem = new Message(messageText).getElement();
+  render(boardElem, messageElem);
+}
+const additionalFilters = new AdditionalFilters();
+const boardTasks = new BoardTasks();
 
 if (taskArray.length === 0 ||
     taskArray.length === taskArray.filter(task => task.isArchive).length) {
-      const messageText = `Congratulations, all tasks were completed! To create a new click on «add new task» button.`;
-      const messageElem = new Message(messageText).getElement();
-      render(boardElem, messageElem);
+      renderMessage();
   } else {
-    const additionalFilters = new AdditionalFilters();
     render(boardElem, additionalFilters.getElement());
-
-    boardElem.insertAdjacentHTML(`beforeend`, `<div class="board__tasks"></div>`)
+    render(boardElem, boardTasks.getElement());
     const tasksContainer = document.querySelector(`.board__tasks`);
 
     // количество подгружаемых блоков
@@ -87,6 +95,7 @@ if (taskArray.length === 0 ||
     const getTasks = () => {
       taskArray.forEach((taskMock, index) => renderTask(taskMock, index));
     }
+
     getTasks();
 
     const loadMoreBtn = new LoadMoreBtn();
@@ -101,6 +110,9 @@ if (taskArray.length === 0 ||
         currentTarget.style.display = `none`;
       }
     }
-    render(boardElem, loadMoreBtnElem);
-    loadMoreBtnElem.addEventListener(`click`, onLoadMoreBtnClick);
+
+    if (TASK_COUNT > finishTaskIndex) {
+      render(boardElem, loadMoreBtnElem);
+      loadMoreBtnElem.addEventListener(`click`, onLoadMoreBtnClick);
+    }
   }
