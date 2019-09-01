@@ -1,33 +1,12 @@
-import {createElement} from '../utils';
-
-class Task {
-  constructor({
-    description,
-    dueDate,
-    repeatingDays,
-    tags,
-    color
-  }) {
-    this._description = description;
-    this._dueDate = new Date(dueDate);
-    this._repeatingDays = repeatingDays;
-    this._tags = tags;
-    this._color = color;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    if (this._element) {
-      this._element = null;
-    }
+import AbstractComponent from './abstractComponent';
+class Task extends AbstractComponent {
+  constructor(data) {
+    super();
+    this._description = data.description;
+    this._dueDate = new Date(data.dueDate);
+    this._repeatingDays = data.repeatingDays;
+    this._tags = data.tags;
+    this._color = data.color;
   }
 
   getTemplate() {

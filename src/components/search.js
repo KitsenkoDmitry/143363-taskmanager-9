@@ -1,21 +1,8 @@
-import {createElement} from '../utils';
-class Search {
+
+import AbstractComponent from './abstractComponent';
+class Search extends AbstractComponent {
   constructor() {
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    if (this._element) {
-      this._element = null;
-    }
+    super();
   }
 
   getTemplate() {
