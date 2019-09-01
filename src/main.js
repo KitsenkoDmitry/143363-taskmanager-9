@@ -17,10 +17,9 @@ render(mainElem, search.getElement());
 const filters = new Filters(filtersArray);
 render(mainElem, filters.getElement());
 
-const boardContainer = new BoardContainer();
-render(mainElem, boardContainer.getElement());
+const boardElem = new BoardContainer().getElement();
+render(mainElem, boardElem);
 
-const boardElem = document.querySelector(`.board`);
 
 const boardController = new BoardController(boardElem, tasksMock);
 boardController.init();

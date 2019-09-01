@@ -50,10 +50,6 @@ class BoardController {
     }
   }
 
-  _getTasksContainer() {
-    return document.querySelector(`.board__tasks`);
-  }
-
   _renderMessage() {
     const messageText = `Congratulations, all tasks were completed!
         To create a new click on «add new task» button.`;
@@ -61,15 +57,14 @@ class BoardController {
     render(this._container, messageElem);
   }
 
-  _renderTask(taskMock, index) {
+  _renderTask(tasks, index) {
     if (index < this._startTaskIndex || index > this._finishTaskIndex) return;
-    const taskElement = new Task(taskMock).getElement();
-    const editTaskElement = new EditTask(taskMock).getElement();
-    const tasksContainer = this._getTasksContainer();
+    const taskElement = new Task(tasks).getElement();
+    const editTaskElement = new EditTask(tasks).getElement();
 
     const onEscKeyDown = (evt) => {
       if (evt.key === `Escape` || evt.key === `Esc`) {
-        tasksContainer.replaceChild(taskElement, editTaskElement);
+        this._boardTasksElem.replaceChild(taskElement, editTaskElement);
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
@@ -77,7 +72,7 @@ class BoardController {
     taskElement
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, () => {
-        tasksContainer.replaceChild(editTaskElement, taskElement);
+        this._boardTasksElem.replaceChild(editTaskElement, taskElement);
         document.addEventListener(`keydown`, onEscKeyDown);
       });
 
@@ -95,15 +90,15 @@ class BoardController {
       .querySelector(`form`)
       .addEventListener(`sumbit`, (e) => {
         e.preventDefault();
-        tasksContainer.replaceChild(taskElement, editTaskElement);
+        this._boardTasksElem.replaceChild(taskElement, editTaskElement);
         document.removeEventListener(`keydown`, onEscKeyDown);
       });
 
-    render(tasksContainer, taskElement);
+    render(this._boardTasksElem, taskElement);
   }
 
   _renderAllTasks() {
-    this._tasks.forEach((taskMock, index) => this._renderTask(taskMock, index));
+    this._tasks.forEach((tasks, index) => this._renderTask(tasks, index));
   }
 }
 
