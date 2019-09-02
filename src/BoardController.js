@@ -1,5 +1,5 @@
 import {render, unrender} from "./utils";
-import AdditionalFilters from "./components/additionalFilters";
+import Sort from "./components/sort";
 import EditTask from "./components/editTask";
 import Task from "./components/task";
 import Message from "./components/message";
@@ -12,12 +12,17 @@ class BoardController {
     this._tasks = tasks;
     this._tasksCount = this._tasks.length;
     this._startTaskIndex = 0;
+    // в _intermediateTaskIndex хранится значение startTaskIndex,
+    // сделано для правильного рендеринга карточек во время сортировки
+    // и при клике на loadMoreBtn
+    this._intermediateTaskIndex = this._startTaskIndex;
     this._finishTaskIndex = 7;
     this._loadBlocsQt = 8;
-    this._additionalFiltersElem = new AdditionalFilters().getElement();
+    this._sortElem = new Sort().getElement();
     this._boardTasksElem = new BoardTasks().getElement();
     this._loadMoreBtnElem = new LoadMoreBtn().getElement();
     this._onLoadMoreBtnClick = this._onLoadMoreBtnClick.bind(this);
+    this._onSortClick = this._onSortClick.bind(this);
   }
 
   init() {
@@ -25,10 +30,40 @@ class BoardController {
       this._tasksCount === this._tasks.filter(task => task.isArchive).length) {
         this._renderMessage();
     } else {
-      render(this._container, this._additionalFiltersElem);
+      render(this._container, this._sortElem);
       render(this._container, this._boardTasksElem);
       this._renderAllTasks();
       this._renderLoadMoreBtn();
+
+      this._sortElem.addEventListener(`click`, this._onSortClick);
+    }
+  }
+
+  _onSortClick(e) {
+    e.preventDefault();
+
+    if (e.target.tagName !== `A`) {
+      return;
+    }
+
+    this._boardTasksElem.innerHTML = ``;
+    this._startTaskIndex = 0;
+
+    switch (e.target.dataset.sortType) {
+      case `date-up`: {
+        const sortByDateUpTasks = this._tasks.slice().sort((a, b) => (a.dueDate - b.dueDate));
+        sortByDateUpTasks.forEach((tasks, index) => this._renderTask(tasks, index));
+        break;
+      }
+      case `date-down`: {
+        const sortByDateDownTasks = this._tasks.slice().sort((a, b) => (b.dueDate - a.dueDate));
+        sortByDateDownTasks.forEach((tasks, index) => this._renderTask(tasks, index));
+        break;
+      }
+      case `default`: {
+        this._renderAllTasks();
+        break;
+      }
     }
   }
 
@@ -40,9 +75,10 @@ class BoardController {
   }
 
   _onLoadMoreBtnClick() {
+    this._startTaskIndex = this._intermediateTaskIndex;
     this._startTaskIndex += this._loadBlocsQt;
     this._finishTaskIndex += this._loadBlocsQt;
-
+    this._intermediateTaskIndex = this._startTaskIndex;
     this._renderAllTasks();
 
     if (this._finishTaskIndex >= this._tasksCount) {
@@ -58,6 +94,7 @@ class BoardController {
   }
 
   _renderTask(tasks, index) {
+    console.log(`${this._startTaskIndex} : ${this._finishTaskIndex}`)
     if (index < this._startTaskIndex || index > this._finishTaskIndex) return;
     const taskElement = new Task(tasks).getElement();
     const editTaskElement = new EditTask(tasks).getElement();

@@ -1,4 +1,4 @@
-const TASK_COUNT = 10;
+const TASK_COUNT = 20;
 
 const getTask = () => ({
   description: [
