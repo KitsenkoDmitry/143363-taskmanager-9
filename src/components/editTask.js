@@ -8,8 +8,97 @@ class EditTask extends AbstractComponent {
     this._repeatingDays = data.repeatingDays;
     this._tags = data.tags;
     this._color = data.color;
-    this._isFavourite = data.isFavourite;
+    this._isFavorite = data.isFavorite;
     this._isArchive = data.isArchive;
+
+    this._toggleDateSelection = this._toggleDateSelection.bind(this);
+    this._toggleRepeat = this._toggleRepeat.bind(this);
+    this._changeColor = this._changeColor.bind(this);
+    this._subscribeOnEvents();
+  }
+
+  _toggleDateSelection(e) {
+    const btn = e.currentTarget;
+    const dateStatusElem = btn.querySelector(`.card__date-status`);
+    const dateInput = this.getElement().querySelector(`.card__date`);
+    if (dateStatusElem.innerText === `YES`) {
+      dateInput.style.display = `none`;
+      dateInput.value = ``;
+      dateStatusElem.innerText = `No`;
+    } else {
+      dateInput.style.display = `block`;
+      dateStatusElem.innerText = `Yes`;
+    }
+  }
+
+  _toggleRepeat(e) {
+    const editTaskElem = this.getElement();
+    const btn = e.currentTarget;
+    const repeatStatusElem = btn.querySelector(`.card__repeat-status`);
+    const repeatDaysElem = editTaskElem.querySelector(`.card__repeat-days`);
+
+    if (repeatStatusElem.innerText === `YES`) {
+      repeatDaysElem.style.display = `none`;
+      repeatStatusElem.innerText = ` No`;
+
+      repeatDaysElem.querySelectorAll(`.card__repeat-day-input`).forEach((it) => {
+        it.checked = false;
+      });
+    } else {
+      repeatDaysElem.style.display = `block`;
+      repeatStatusElem.innerText = ` Yes`;
+    }
+
+    editTaskElem.classList.toggle(`card--repeat`);
+  }
+
+  _changeColor({currentTarget}) {
+    if (currentTarget.checked) {
+      const color = currentTarget.value;
+      this.getElement().classList.remove(`card--black`, `card--yellow`, `card--blue`, `card--green`, `card--pink`);
+      this.getElement().classList.add(`card--${color}`);
+    }
+  }
+
+  _subscribeOnEvents() {
+    // добавление хештега
+    this.getElement().querySelector(`.card__hashtag-input`).addEventListener(`keydown`, (e) => {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+
+        this.getElement().querySelector(`.card__hashtag-list`).insertAdjacentHTML(`beforeend`, `<span class="card__hashtag-inner">
+            <input
+              type="hidden"
+              name="hashtag"
+              value="${e.target.value}"
+              class="card__hashtag-hidden-input"
+            />
+            <p class="card__hashtag-name">
+              #${e.target.value}
+            </p>
+            <button type="button" class="card__hashtag-delete">
+              delete
+            </button>
+          </span>`);
+
+        e.target.value = ``;
+      }
+    });
+
+    // удаление хештега
+    this.getElement().querySelector(`.card__hashtag-list`).addEventListener(`click`, (e) => {
+      if (e.target.classList.contains(`card__hashtag-delete`)) {
+        e.target.parentNode.remove();
+      }
+    });
+
+    this.getElement().querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, this._toggleDateSelection);
+
+    this.getElement().querySelector(`.card__repeat-toggle`).addEventListener(`click`, this._toggleRepeat);
+
+    this.getElement().querySelectorAll(`.card__color-input`).forEach((it) => {
+      it.addEventListener(`change`, this._changeColor);
+    });
   }
 
   getTemplate() {
@@ -28,7 +117,7 @@ class EditTask extends AbstractComponent {
               <button
                 type="button"
                 class="card__btn card__btn--favorites
-                ${this._isFavourite ? `` : `card__btn--disabled`}"
+                ${this._isFavorite ? `` : `card__btn--disabled`}"
               >
                 favorites
               </button>
@@ -56,7 +145,7 @@ class EditTask extends AbstractComponent {
                 <div class="card__dates">
                   <button class="card__date-deadline-toggle" type="button">
                     date: <span class="card__date-status">
-                      ${this._dueDate ? this._dueDate.toDateString() : `no`}
+                      ${this._dueDate ? ` yes` : ` no`}
                     </span>
                   </button>
 
@@ -68,7 +157,7 @@ class EditTask extends AbstractComponent {
                         type="text"
                         placeholder="23 September"
                         name="date"
-                        value="${this._dueDate.toDateString()}"
+                        value="${this._dueDate}"
                       />
                     </label>
                   </fieldset>
@@ -80,7 +169,7 @@ class EditTask extends AbstractComponent {
                   </button>
 
                   <fieldset class="card__repeat-days"
-                    ${Object.keys(this._repeatingDays).some((day) => this._repeatingDays[day]) ? `` : `disabled`}>
+                    ${Object.keys(this._repeatingDays).some((day) => this._repeatingDays[day]) ? `` : `style: "display: none"`}>
                     <div class="card__repeat-days-inner">
                       <input
                         class="visually-hidden card__repeat-day-input"
@@ -165,11 +254,21 @@ class EditTask extends AbstractComponent {
 
                 <div class="card__hashtag">
                   <div class="card__hashtag-list">
-                    ${Array.from(this._tags).map((tag) => `<span class="card__hashtag-inner">
-                          <span class="card__hashtag-name">
-                            #${tag}
-                          </span>
-                        </span>`).join(``)}
+                    ${Array.from(this._tags).map((tag) => `
+                    <span class="card__hashtag-inner">
+                      <input
+                        type="hidden"
+                        name="hashtag"
+                        value="${tag}"
+                        class="card__hashtag-hidden-input"
+                      />
+                      <p class="card__hashtag-name">
+                        #${tag}
+                      </p>
+                      <button type="button" class="card__hashtag-delete">
+                        delete
+                      </button>
+                    </span>`).join(``)}
                   </div>
 
                   <label>
