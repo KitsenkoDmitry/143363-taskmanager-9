@@ -1,6 +1,6 @@
 import Task from "./components/task";
 import EditTask from "./components/editTask";
-import {render} from "./utils";
+import {render, getRepeatingDays} from "./utils";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/themes/light.css";
@@ -89,19 +89,7 @@ class TaskController {
           repeatingDays: '',
           color: formData.get(`color`),
           tags: new Set(formData.getAll(`hashtag`)),
-          repeatingDays:
-            formData.getAll(`repeat`).reduce((acc, day)=>{
-              acc[day] = true;
-              return acc;
-            },{
-              mo: false,
-              tu: false,
-              we: false,
-              th: false,
-              fr: false,
-              sa: false,
-              su: false
-            }),
+          repeatingDays: getRepeatingDays(formData),
           isFavorite: this._task[`isFavorite`],
           isArchive: this._task[`isArchive`]
         }

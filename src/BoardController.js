@@ -117,7 +117,6 @@ class BoardController {
       this._onChangeView);
 
     this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-    console.log(this._subscriptions);
   }
 
   _renderAllTasks() {
