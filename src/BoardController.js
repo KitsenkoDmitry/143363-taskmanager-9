@@ -1,10 +1,9 @@
 import {render, unrender} from "./utils";
 import Sort from "./components/sort";
-import EditTask from "./components/editTask";
-import Task from "./components/task";
 import Message from "./components/message";
 import LoadMoreBtn from "./components/loadMoreBtn";
 import BoardTasks from "./components/boardTasks";
+import TaskController from './TaskController';
 
 class BoardController {
   constructor(container, tasks) {
@@ -15,14 +14,18 @@ class BoardController {
     // в _intermediateTaskIndex хранится значение startTaskIndex,
     // сделано для правильного рендеринга карточек во время сортировки
     // и при клике на loadMoreBtn
-    this._intermediateTaskIndex = this._startTaskIndex;
+    this._intermediateTaskIndex = 0;
     this._finishTaskIndex = 7;
     this._loadBlocsQt = 8;
     this._sortElem = new Sort().getElement();
-    this._boardTasksElem = new BoardTasks().getElement();
+    this._boardTasks = new BoardTasks();
     this._loadMoreBtnElem = new LoadMoreBtn().getElement();
     this._onLoadMoreBtnClick = this._onLoadMoreBtnClick.bind(this);
     this._onSortClick = this._onSortClick.bind(this);
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onChangeView = this._onChangeView.bind(this);
+
+    this._subscriptions = [];
   }
 
   init() {
@@ -31,7 +34,7 @@ class BoardController {
         this._renderMessage();
     } else {
       render(this._container, this._sortElem);
-      render(this._container, this._boardTasksElem);
+      render(this._container, this._boardTasks.getElement());
       this._renderAllTasks();
       this._renderLoadMoreBtn();
 
@@ -39,14 +42,26 @@ class BoardController {
     }
   }
 
+  _onDataChange(newData, oldData) {
+    this._startTaskIndex = 0;
+    this._tasks[this._tasks.findIndex((task) => task === oldData)] = newData;
+    this._boardTasks.getElement().innerHTML = ``;
+
+    this._renderAllTasks();
+  }
+
+  _onChangeView() {
+    this._subscriptions.forEach((subscription) => subscription());
+  }
+
   _onSortClick(e) {
     e.preventDefault();
 
-    if (e.target.tagName !== `A`) {
+    if (e.target.className !== `board__filter`) {
       return;
     }
 
-    this._boardTasksElem.innerHTML = ``;
+    this._boardTasks.getElement().innerHTML = ``;
     this._startTaskIndex = 0;
 
     switch (e.target.dataset.sortType) {
@@ -93,45 +108,15 @@ class BoardController {
     render(this._container, messageElem);
   }
 
-  _renderTask(tasks, index) {
-    console.log(`${this._startTaskIndex} : ${this._finishTaskIndex}`)
+  _renderTask(task, index) {
     if (index < this._startTaskIndex || index > this._finishTaskIndex) return;
-    const taskElement = new Task(tasks).getElement();
-    const editTaskElement = new EditTask(tasks).getElement();
+    const taskController = new TaskController(
+      this._boardTasks.getElement(),
+      task,
+      this._onDataChange,
+      this._onChangeView);
 
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        this._boardTasksElem.replaceChild(taskElement, editTaskElement);
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      }
-    };
-
-    taskElement
-      .querySelector(`.card__btn--edit`)
-      .addEventListener(`click`, () => {
-        this._boardTasksElem.replaceChild(editTaskElement, taskElement);
-        document.addEventListener(`keydown`, onEscKeyDown);
-      });
-
-    editTaskElement.querySelector(`textarea`)
-      .addEventListener(`focus`, () => {
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
-
-    editTaskElement.querySelector(`textarea`)
-      .addEventListener(`blur`, () => {
-        document.addEventListener(`keydown`, onEscKeyDown);
-      });
-
-    editTaskElement
-      .querySelector(`form`)
-      .addEventListener(`sumbit`, (e) => {
-        e.preventDefault();
-        this._boardTasksElem.replaceChild(taskElement, editTaskElement);
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      });
-
-    render(this._boardTasksElem, taskElement);
+    this._subscriptions.push(taskController.setDefaultView.bind(taskController));
   }
 
   _renderAllTasks() {
