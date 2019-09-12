@@ -1,12 +1,15 @@
 import Task from "./components/task";
 import EditTask from "./components/editTask";
-import {render, getRepeatingDays} from "./utils";
+import {render, Position, Mode} from "./utils";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import "flatpickr/dist/themes/light.css";
 
+/**
+ * Логика взаимодействия с карточкой задачи
+ */
 class TaskController {
-  constructor(container, task, onDataChange, onChangeView) {
+  constructor(container, task, mode, onDataChange, onChangeView) {
     this._container = container;
     this._task = task;
     this._onDataChange = onDataChange;
@@ -15,10 +18,13 @@ class TaskController {
     this._taskElement = new Task(task).getElement();
     this._editTaskElement = new EditTask(task).getElement();
 
-    this.init();
+    this._init(mode);
   }
 
-  init() {
+  _init(mode) {
+    let currentView = mode === Mode.ADDING ? this._editTaskElement : this._taskElement;
+    let renderPosition = mode === Mode.ADDING ? Position.AFTERBEGIN : Position.BEFOREEND;
+
     flatpickr(this._editTaskElement.querySelector(`.card__date`), {
       dateFormat: "d F G:i K",
       altInput: true,
@@ -51,6 +57,10 @@ class TaskController {
         document.addEventListener(`keydown`, onEscKeyDown);
       });
 
+    this._editTaskElement.querySelector(`.card__delete`).addEventListener(`click`, ()=> {
+      this._onDataChange(null, this._task);
+    })
+
     const onArchiveBtnClick = () => {
       let entry = Object.assign({}, this._task);
       entry[`isArchive`] = !entry[`isArchive`];
@@ -77,8 +87,8 @@ class TaskController {
 
 
     this._editTaskElement
-      .querySelector(`.card__save`)
-      .addEventListener(`click`, (e) => {
+      .querySelector(`form`)
+      .addEventListener(`submit`, (e) => {
         e.preventDefault();
 
         const formData = new FormData(this._editTaskElement.querySelector(`.card__form`));
@@ -94,19 +104,34 @@ class TaskController {
           isArchive: this._task[`isArchive`]
         }
 
-        this._onDataChange(entry, this._task);
+        this._onDataChange(entry, mode === Mode.DEFAULT ? this._task : null);
         document.removeEventListener(`keydown`, onEscKeyDown);
       });
 
-    render(this._container, this._taskElement);
+    render(this._container, currentView, renderPosition);
   }
 
   setDefaultView() {
-      if (this._container.contains(this._editTaskElement)) {
-          this._container
-            .replaceChild(this._taskElement, this._editTaskElement);
-      }
+    if (this._container.contains(this._editTaskElement)) {
+        this._container
+          .replaceChild(this._taskElement, this._editTaskElement);
+    }
   }
 }
 
 export default TaskController;
+
+function getRepeatingDays(formData) {
+  return formData.getAll(`repeat`).reduce((acc, day)=>{
+    acc[day] = true;
+    return acc;
+  },{
+    mo: false,
+    tu: false,
+    we: false,
+    th: false,
+    fr: false,
+    sa: false,
+    su: false
+  })
+}

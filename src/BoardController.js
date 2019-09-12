@@ -1,57 +1,69 @@
-import {render, unrender} from "./utils";
+import {render, unrender, Mode} from "./utils";
 import Sort from "./components/sort";
 import Message from "./components/message";
 import LoadMoreBtn from "./components/loadMoreBtn";
 import BoardTasks from "./components/boardTasks";
 import TaskController from './TaskController';
+import TaskListController from "./TaskListController";
 
+const TASKS_IN_ROW = 8;
 class BoardController {
-  constructor(container, tasks) {
+  constructor(container) {
     this._container = container;
-    this._tasks = tasks;
-    this._tasksCount = this._tasks.length;
-    this._startTaskIndex = 0;
-    // в _intermediateTaskIndex хранится значение startTaskIndex,
-    // сделано для правильного рендеринга карточек во время сортировки
-    // и при клике на loadMoreBtn
-    this._intermediateTaskIndex = 0;
-    this._finishTaskIndex = 7;
-    this._loadBlocsQt = 8;
-    this._sortElem = new Sort().getElement();
+    this._tasks = [];
+    this._creatingTask = null;
+    this._sort = new Sort();
     this._boardTasks = new BoardTasks();
-    this._loadMoreBtnElem = new LoadMoreBtn().getElement();
+    this._loadMoreBtn = new LoadMoreBtn();
     this._onLoadMoreBtnClick = this._onLoadMoreBtnClick.bind(this);
     this._onSortClick = this._onSortClick.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-    this._onChangeView = this._onChangeView.bind(this);
-
     this._subscriptions = [];
+    this._showedTasks = TASKS_IN_ROW;
+    this._taskListController = new TaskListController(this._boardTasks.getElement(), this._onDataChange);
+
+    this._init();
   }
 
-  init() {
-    if (!this._tasksCount ||
-      this._tasksCount === this._tasks.filter(task => task.isArchive).length) {
-        this._renderMessage();
+  _init() {
+    render(this._container, this._sort.getElement());
+    render(this._container, this._boardTasks.getElement());
+    this._sort.getElement().addEventListener(`click`, this._onSortClick);
+  }
+
+  show(tasks) {
+    if (tasks !== this._tasks) this.setTasks(tasks);
+    this._container.classList.remove(`visually-hidden`);
+  }
+
+  hide() {
+    this._container.classList.add(`visually-hidden`);
+  }
+
+  createTask() {
+    this._taskListController.createTask();
+  }
+
+  setTasks(tasks) {
+    this._tasks = tasks;
+    this._showedTasks = TASKS_IN_ROW;
+
+    this._renderBoard();
+  }
+
+  _renderBoard() {
+    if (!this._tasks.length ||
+      this._tasks.length === this._tasks.filter(task => task.isArchive).length) {
+      this._renderMessage();
     } else {
-      render(this._container, this._sortElem);
-      render(this._container, this._boardTasks.getElement());
-      this._renderAllTasks();
-      this._renderLoadMoreBtn();
+      this._unrenderLoadMoreBtn();
+      if (this._showedTasks < this._tasks.length) {
+        render(this._container, this._loadMoreBtn.getElement());
+        this._loadMoreBtn.getElement().addEventListener(`click`, this._onLoadMoreBtnClick);
+      }
 
-      this._sortElem.addEventListener(`click`, this._onSortClick);
+      this._taskListController.setTasks(this._tasks.slice(0, this._showedTasks));
     }
-  }
-
-  _onDataChange(newData, oldData) {
-    this._startTaskIndex = 0;
-    this._tasks[this._tasks.findIndex((task) => task === oldData)] = newData;
-    this._boardTasks.getElement().innerHTML = ``;
-
-    this._renderAllTasks();
-  }
-
-  _onChangeView() {
-    this._subscriptions.forEach((subscription) => subscription());
   }
 
   _onSortClick(e) {
@@ -67,38 +79,36 @@ class BoardController {
     switch (e.target.dataset.sortType) {
       case `date-up`: {
         const sortByDateUpTasks = this._tasks.slice().sort((a, b) => (a.dueDate - b.dueDate));
-        sortByDateUpTasks.forEach((tasks, index) => this._renderTask(tasks, index));
+        this._taskListController.setTasks(sortByDateUpTasks);
         break;
       }
       case `date-down`: {
         const sortByDateDownTasks = this._tasks.slice().sort((a, b) => (b.dueDate - a.dueDate));
-        sortByDateDownTasks.forEach((tasks, index) => this._renderTask(tasks, index));
+        this._taskListController.setTasks(sortByDateDownTasks);
         break;
       }
       case `default`: {
-        this._renderAllTasks();
+        this._taskListController.setTasks(this._tasks);
         break;
       }
     }
   }
 
-  _renderLoadMoreBtn() {
-    if (this._tasksCount > this._finishTaskIndex) {
-      render(this._container, this._loadMoreBtnElem);
-      this._loadMoreBtnElem.addEventListener(`click`, this._onLoadMoreBtnClick);
-    }
+  _onDataChange() {
   }
 
   _onLoadMoreBtnClick() {
-    this._startTaskIndex = this._intermediateTaskIndex;
-    this._startTaskIndex += this._loadBlocsQt;
-    this._finishTaskIndex += this._loadBlocsQt;
-    this._intermediateTaskIndex = this._startTaskIndex;
-    this._renderAllTasks();
+    this._taskListController.addTasks(this._tasks.slice(this._showedTasks, this._showedTasks + TASKS_IN_ROW));
+    this._showedTasks += TASKS_IN_ROW;
 
-    if (this._finishTaskIndex >= this._tasksCount) {
-      unrender(this._loadMoreBtnElem);
+    if (this._showedTasks > this._tasks.length) {
+      this._unrenderLoadMoreBtn();
     }
+  }
+
+  _unrenderLoadMoreBtn() {
+      unrender(this._loadMoreBtn.getElement());
+      this._loadMoreBtn.removeElement();
   }
 
   _renderMessage() {
@@ -106,21 +116,6 @@ class BoardController {
         To create a new click on «add new task» button.`;
     const messageElem = new Message(messageText).getElement();
     render(this._container, messageElem);
-  }
-
-  _renderTask(task, index) {
-    if (index < this._startTaskIndex || index > this._finishTaskIndex) return;
-    const taskController = new TaskController(
-      this._boardTasks.getElement(),
-      task,
-      this._onDataChange,
-      this._onChangeView);
-
-    this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-  }
-
-  _renderAllTasks() {
-    this._tasks.forEach((tasks, index) => this._renderTask(tasks, index));
   }
 }
 
