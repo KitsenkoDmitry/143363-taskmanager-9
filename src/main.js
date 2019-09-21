@@ -6,6 +6,7 @@ import Search from "./components/search";
 import Filters from "./components/filters";
 import BoardContainer from "./components/boardContainer";
 import Statistic from "./components/statistic";
+import SearchController from './SearchController';
 
 const controlElem = document.querySelector(`.control`);
 const menuElem = new Menu().getElement();
@@ -23,6 +24,14 @@ render(mainElem, boardContainer);
 
 const boardController = new BoardController(boardContainer);
 boardController.setTasks(tasksMock);
+
+const onSearchBackButtonClick = () => {
+  statistic.hide();
+  searchController.hide();
+  boardController.show(tasksMock);
+};
+const searchController = new SearchController(mainElem, search, onSearchBackButtonClick);
+
 const statistic = new Statistic();
 
 render(mainElem, statistic.getElement());
@@ -38,20 +47,29 @@ menuElem.addEventListener(`change`, (e) => {
   switch (e.target.id) {
     case tasksId: {
       boardController.show(tasksMock);
+      searchController.hide();
       statistic.hide();
       break;
     }
     case statisticId: {
       boardController.hide();
+      searchController.hide();
       statistic.show();
       break;
     }
     case newTaskId: {
       boardController.createTask();
       statistic.hide();
+    searchController.hide();
       boardController.show(tasksMock);
       menuElem.querySelector(`#${tasksId}`).checked = true;
       break;
     }
   }
 })
+
+search.getElement().addEventListener(`click`, () => {
+  statistic.hide();
+  boardController.hide();
+  searchController.show(tasksMock);
+});

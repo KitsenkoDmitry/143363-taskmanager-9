@@ -2,9 +2,8 @@ import TaskController from './TaskController';
 import {render, unrender, Mode} from "./utils";
 
 class TaskListController {
-  constructor(container, onDataChange) {
+  constructor(container) {
     this._container = container;
-    this._onDataChangeMain = onDataChange;
 
     this._creatingTask = null;
     this._subscriptions = [];
@@ -65,6 +64,7 @@ class TaskListController {
   }
 
   _onDataChange(newData, oldData) {
+    const index = this._tasks.findIndex((task) => {return task === oldData});
     if (newData === null) {
       this._creatingTask = null;
       this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];

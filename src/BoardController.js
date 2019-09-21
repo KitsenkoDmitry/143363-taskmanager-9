@@ -3,7 +3,6 @@ import Sort from "./components/sort";
 import Message from "./components/message";
 import LoadMoreBtn from "./components/loadMoreBtn";
 import BoardTasks from "./components/boardTasks";
-import TaskController from './TaskController';
 import TaskListController from "./TaskListController";
 
 const TASKS_IN_ROW = 8;
@@ -17,10 +16,9 @@ class BoardController {
     this._loadMoreBtn = new LoadMoreBtn();
     this._onLoadMoreBtnClick = this._onLoadMoreBtnClick.bind(this);
     this._onSortClick = this._onSortClick.bind(this);
-    this._onDataChange = this._onDataChange.bind(this);
     this._subscriptions = [];
     this._showedTasks = TASKS_IN_ROW;
-    this._taskListController = new TaskListController(this._boardTasks.getElement(), this._onDataChange);
+    this._taskListController = new TaskListController(this._boardTasks.getElement());
 
     this._init();
   }
@@ -72,29 +70,24 @@ class BoardController {
     if (e.target.className !== `board__filter`) {
       return;
     }
-
     this._boardTasks.getElement().innerHTML = ``;
-    this._startTaskIndex = 0;
 
     switch (e.target.dataset.sortType) {
       case `date-up`: {
         const sortByDateUpTasks = this._tasks.slice().sort((a, b) => (a.dueDate - b.dueDate));
-        this._taskListController.setTasks(sortByDateUpTasks);
+        this.setTasks(sortByDateUpTasks);
         break;
       }
       case `date-down`: {
         const sortByDateDownTasks = this._tasks.slice().sort((a, b) => (b.dueDate - a.dueDate));
-        this._taskListController.setTasks(sortByDateDownTasks);
+        this.setTasks(sortByDateDownTasks);
         break;
       }
       case `default`: {
-        this._taskListController.setTasks(this._tasks);
+        this.setTasks(this._tasks);
         break;
       }
     }
-  }
-
-  _onDataChange() {
   }
 
   _onLoadMoreBtnClick() {
